@@ -1,6 +1,6 @@
 import { serve } from '@hono/node-server';
-import { createApp } from './api/app';
-import { getContext } from './context';
+import { createApp } from './api/app.js';
+import { getContext } from './context.js';
 
 const port = Number(process.env.PORT ?? 8787);
 await getContext(); // migrate + seed up front so the first request is fast

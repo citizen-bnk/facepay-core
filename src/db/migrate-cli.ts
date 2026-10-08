@@ -1,4 +1,4 @@
-import { createDb, runMigrations } from './client';
+import { createDb, runMigrations } from './client.js';
 
 const h = await createDb();
 await runMigrations(h);

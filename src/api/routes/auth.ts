@@ -1,12 +1,12 @@
 import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { checkPassword, signToken, TOKEN_TTL_SECONDS } from '../../auth';
-import { tenants, users } from '../../db/schema';
-import { DomainError, isRole } from '../../domain/rbac';
-import { appendAudit } from '../../services/audit';
-import { jsonBody, parse, type Env } from '../http';
-import { rateLimit } from '../ratelimit';
+import { checkPassword, signToken, TOKEN_TTL_SECONDS } from '../../auth.js';
+import { tenants, users } from '../../db/schema.js';
+import { DomainError, isRole } from '../../domain/rbac.js';
+import { appendAudit } from '../../services/audit.js';
+import { jsonBody, parse, type Env } from '../http.js';
+import { rateLimit } from '../ratelimit.js';
 
 export const authRoutes = new Hono<Env>();
 

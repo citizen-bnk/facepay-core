@@ -1,4 +1,4 @@
-import { OPERATIONS } from './openapi';
+import { OPERATIONS } from './openapi.js';
 
 const esc = (s: string) => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]!);
 

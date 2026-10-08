@@ -1,4 +1,4 @@
-import { PERMISSIONS } from '../domain/rbac';
+import { PERMISSIONS } from '../domain/rbac.js';
 
 type Op = { m: 'get' | 'post'; path: string; summary: string; perm?: string; body?: string; res?: string; idem?: 'required' | 'optional'; public?: boolean; query?: string[] };
 

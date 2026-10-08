@@ -1,7 +1,7 @@
 import { and, eq, gte, sql } from 'drizzle-orm';
 import { Hono } from 'hono';
-import { devices, metrics, refunds, settlementBatches, transactions } from '../../db/schema';
-import { requirePerm, type Env } from '../http';
+import { devices, metrics, refunds, settlementBatches, transactions } from '../../db/schema.js';
+import { requirePerm, type Env } from '../http.js';
 
 export const dashboardRoutes = new Hono<Env>();
 

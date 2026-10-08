@@ -1,6 +1,6 @@
 import { SignJWT, jwtVerify } from 'jose';
 import bcrypt from 'bcryptjs';
-import { DomainError, isRole, permissionsFor, type Principal, type Role } from './domain/rbac';
+import { DomainError, isRole, permissionsFor, type Principal, type Role } from './domain/rbac.js';
 
 const ISSUER = 'facepay-core';
 const AUDIENCE = 'facepay-api';

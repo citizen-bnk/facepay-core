@@ -1,4 +1,4 @@
-import { DomainError } from './rbac';
+import { DomainError } from './rbac.js';
 
 /**
  * Payment intent state machine.

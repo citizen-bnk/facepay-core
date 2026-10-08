@@ -1,12 +1,12 @@
 import { and, eq, inArray } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
-import type { AppContext } from '../context';
-import { biometricConsents, paymentInstruments, paymentIntents, providerAccounts, tenants, transactions, users, verificationSessions } from '../db/schema';
-import { assertBiometricAllowed, isBiometric } from '../domain/consent';
-import { assertTransition, isExpired, toTxnStatus, type IntentStatus } from '../domain/payment-intent';
-import { DomainError, canAccessRow, type Principal } from '../domain/rbac';
-import { appendAudit } from './audit';
-import type { BiometricModality } from '../providers/types';
+import type { AppContext } from '../context.js';
+import { biometricConsents, paymentInstruments, paymentIntents, providerAccounts, tenants, transactions, users, verificationSessions } from '../db/schema.js';
+import { assertBiometricAllowed, isBiometric } from '../domain/consent.js';
+import { assertTransition, isExpired, toTxnStatus, type IntentStatus } from '../domain/payment-intent.js';
+import { DomainError, canAccessRow, type Principal } from '../domain/rbac.js';
+import { appendAudit } from './audit.js';
+import type { BiometricModality } from '../providers/types.js';
 
 const newId = (p: string) => `${p}_${randomUUID().replace(/-/g, '').slice(0, 20)}`;
 export const MAX_AMOUNT_MINOR = 100_000_000;

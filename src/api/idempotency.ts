@@ -1,10 +1,10 @@
 import { and, eq } from 'drizzle-orm';
 import type { Context } from 'hono';
-import type { Db } from '../db/client';
-import { idempotencyKeys } from '../db/schema';
-import { hashObject } from '../domain/audit';
-import { DomainError } from '../domain/rbac';
-import type { Env } from './http';
+import type { Db } from '../db/client.js';
+import { idempotencyKeys } from '../db/schema.js';
+import { hashObject } from '../domain/audit.js';
+import { DomainError } from '../domain/rbac.js';
+import type { Env } from './http.js';
 
 /**
  * Exactly-once business effect for POSTs. Same (principal, route, key) + same body => the original

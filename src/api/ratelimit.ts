@@ -1,4 +1,4 @@
-import { DomainError } from '../domain/rbac';
+import { DomainError } from '../domain/rbac.js';
 
 const hits = new Map<string, number[]>();
 

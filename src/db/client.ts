@@ -6,7 +6,7 @@ import { migrate as migratePg } from 'drizzle-orm/node-postgres/migrator';
 import type { PgDatabase } from 'drizzle-orm/pg-core';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import * as schema from './schema';
+import * as schema from './schema.js';
 
 export type Db = PgDatabase<any, typeof schema>;
 export { schema };

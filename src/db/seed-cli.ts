@@ -1,5 +1,5 @@
-import { createDb, runMigrations } from './client';
-import { seed } from './seed';
+import { createDb, runMigrations } from './client.js';
+import { seed } from './seed.js';
 
 const h = await createDb();
 await runMigrations(h);

@@ -1,4 +1,4 @@
-import { DomainError } from './rbac';
+import { DomainError } from './rbac.js';
 
 export const REFUND_STATUSES = ['pending_approval', 'approved', 'processing', 'processed', 'rejected', 'failed'] as const;
 export type RefundStatus = (typeof REFUND_STATUSES)[number];

@@ -2,13 +2,13 @@ import { and, desc, eq, lt, or } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import { approvals, auditEvents, integrations, webhookSubscriptions } from '../../db/schema';
-import { sha256, verifyChain } from '../../domain/audit';
-import { DomainError, ROLES, ROLE_MATRIX, PERMISSIONS, type Principal } from '../../domain/rbac';
-import { appendAudit, loadChain } from '../../services/audit';
-import { publicAudit } from '../../services/serialize';
-import { withIdempotency } from '../idempotency';
-import { jsonBody, pageParams, parse, requirePerm, type Env } from '../http';
+import { approvals, auditEvents, integrations, webhookSubscriptions } from '../../db/schema.js';
+import { sha256, verifyChain } from '../../domain/audit.js';
+import { DomainError, ROLES, ROLE_MATRIX, PERMISSIONS, type Principal } from '../../domain/rbac.js';
+import { appendAudit, loadChain } from '../../services/audit.js';
+import { publicAudit } from '../../services/serialize.js';
+import { withIdempotency } from '../idempotency.js';
+import { jsonBody, pageParams, parse, requirePerm, type Env } from '../http.js';
 
 export const adminRoutes = new Hono<Env>();
 

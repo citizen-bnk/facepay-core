@@ -1,9 +1,9 @@
 import bcrypt from 'bcryptjs';
 import { sql } from 'drizzle-orm';
-import type { Db } from './client';
-import * as s from './schema';
-import { appendAudit } from '../services/audit';
-import { reconcile } from '../domain/reconciliation';
+import type { Db } from './client.js';
+import * as s from './schema.js';
+import { appendAudit } from '../services/audit.js';
+import { reconcile } from '../domain/reconciliation.js';
 
 export const DEMO_PASSWORD = 'facepay-demo';
 const DAY = 86_400_000;

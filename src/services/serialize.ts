@@ -1,5 +1,5 @@
-import { isPaid, toTxnStatus, type IntentStatus } from '../domain/payment-intent';
-import type { auditEvents, paymentIntents, transactions } from '../db/schema';
+import { isPaid, toTxnStatus, type IntentStatus } from '../domain/payment-intent.js';
+import type { auditEvents, paymentIntents, transactions } from '../db/schema.js';
 
 type Txn = typeof transactions.$inferSelect;
 type Intent = typeof paymentIntents.$inferSelect;

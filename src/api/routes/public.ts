@@ -1,11 +1,11 @@
 import { Hono } from 'hono';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import { leads } from '../../db/schema';
-import { jsonBody, parse, type Env } from '../http';
-import { rateLimit } from '../ratelimit';
-import { buildOpenApi } from '../openapi';
-import { docsHtml } from '../docs';
+import { leads } from '../../db/schema.js';
+import { jsonBody, parse, type Env } from '../http.js';
+import { rateLimit } from '../ratelimit.js';
+import { buildOpenApi } from '../openapi.js';
+import { docsHtml } from '../docs.js';
 
 export const publicRoutes = new Hono<Env>();
 

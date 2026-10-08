@@ -1,9 +1,9 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { confirmIntent, createIntent, createVerificationSession, getIntent, transactionIdFor, MAX_AMOUNT_MINOR } from '../../services/payments';
-import { publicIntent } from '../../services/serialize';
-import { withIdempotency } from '../idempotency';
-import { jsonBody, parse, requirePerm, type Env } from '../http';
+import { confirmIntent, createIntent, createVerificationSession, getIntent, transactionIdFor, MAX_AMOUNT_MINOR } from '../../services/payments.js';
+import { publicIntent } from '../../services/serialize.js';
+import { withIdempotency } from '../idempotency.js';
+import { jsonBody, parse, requirePerm, type Env } from '../http.js';
 
 export const paymentRoutes = new Hono<Env>();
 

@@ -1,10 +1,10 @@
 import { and, eq, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
-import type { AppContext } from '../context';
-import { paymentIntents, refunds, transactions } from '../db/schema';
-import { assertChecker, assertPending, assertRefundable, requiresChecker, refundThreshold } from '../domain/refund';
-import { DomainError, canAccessRow, type Principal } from '../domain/rbac';
-import { appendAudit } from './audit';
+import type { AppContext } from '../context.js';
+import { paymentIntents, refunds, transactions } from '../db/schema.js';
+import { assertChecker, assertPending, assertRefundable, requiresChecker, refundThreshold } from '../domain/refund.js';
+import { DomainError, canAccessRow, type Principal } from '../domain/rbac.js';
+import { appendAudit } from './audit.js';
 
 type Refund = typeof refunds.$inferSelect;
 

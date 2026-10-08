@@ -1,8 +1,8 @@
 import { desc, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
-import type { Db } from '../db/client';
-import { auditEvents } from '../db/schema';
-import { GENESIS, computeHash, hashObject, type AuditInput, type ChainRow } from '../domain/audit';
+import type { Db } from '../db/client.js';
+import { auditEvents } from '../db/schema.js';
+import { GENESIS, computeHash, hashObject, type AuditInput, type ChainRow } from '../domain/audit.js';
 
 /** Appends to the hash-chained audit log. Serialised via an advisory lock so the chain never forks. */
 export async function appendAudit(db: Db, input: AuditInput, at = new Date()): Promise<void> {

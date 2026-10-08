@@ -1,4 +1,4 @@
-import { DomainError } from './rbac';
+import { DomainError } from './rbac.js';
 
 export type Modality = 'face' | 'fingerprint' | 'palm' | 'retina' | 'pin';
 export const BIOMETRIC_MODALITIES: readonly Modality[] = ['face', 'fingerprint', 'palm', 'retina'];

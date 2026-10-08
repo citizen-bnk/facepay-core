@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import type { AccountStore, BiometricProvider, ChallengeRequest, ChallengeResult, PaymentProvider, Providers } from './types';
+import type { AccountStore, BiometricProvider, ChallengeRequest, ChallengeResult, PaymentProvider, Providers } from './types.js';
 
 const h = (s: string) => createHash('sha256').update(s).digest('hex');
 

@@ -1,7 +1,7 @@
 import type { Context } from 'hono';
 import { z, ZodError } from 'zod';
-import { DomainError, type Permission, type Principal } from '../domain/rbac';
-import type { AppContext } from '../context';
+import { DomainError, type Permission, type Principal } from '../domain/rbac.js';
+import type { AppContext } from '../context.js';
 
 export type Env = { Variables: { principal: Principal; app: AppContext } };
 

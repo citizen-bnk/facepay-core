@@ -1,9 +1,9 @@
 import { eq, sql } from 'drizzle-orm';
-import { createDb, runMigrations, type Db, type DbHandle } from './db/client';
-import { providerAccounts } from './db/schema';
-import { seed } from './db/seed';
-import { createMockProviders } from './providers/mock';
-import type { Providers } from './providers/types';
+import { createDb, runMigrations, type Db, type DbHandle } from './db/client.js';
+import { providerAccounts } from './db/schema.js';
+import { seed } from './db/seed.js';
+import { createMockProviders } from './providers/mock.js';
+import type { Providers } from './providers/types.js';
 
 export interface AppContext {
   db: Db;

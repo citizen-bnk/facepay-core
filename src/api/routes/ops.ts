@@ -1,16 +1,16 @@
 import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { biometricConsents, devices, settlementBatches, settlementLines, tenants, transactions, users } from '../../db/schema';
-import { reconcile } from '../../domain/reconciliation';
-import { DomainError, ROLE_MATRIX, canReadRawBiometrics } from '../../domain/rbac';
-import { isActive } from '../../domain/consent';
-import { appendAudit } from '../../services/audit';
-import { maskEmail, maskName } from '../../services/serialize';
-import { withIdempotency } from '../idempotency';
-import { jsonBody, parse, requirePerm, type Env } from '../http';
+import { biometricConsents, devices, settlementBatches, settlementLines, tenants, transactions, users } from '../../db/schema.js';
+import { reconcile } from '../../domain/reconciliation.js';
+import { DomainError, ROLE_MATRIX, canReadRawBiometrics } from '../../domain/rbac.js';
+import { isActive } from '../../domain/consent.js';
+import { appendAudit } from '../../services/audit.js';
+import { maskEmail, maskName } from '../../services/serialize.js';
+import { withIdempotency } from '../idempotency.js';
+import { jsonBody, parse, requirePerm, type Env } from '../http.js';
 import { randomUUID } from 'node:crypto';
-import type { AppContext } from '../../context';
+import type { AppContext } from '../../context.js';
 
 export const opsRoutes = new Hono<Env>();
 
