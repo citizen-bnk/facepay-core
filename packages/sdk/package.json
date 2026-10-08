@@ -1,0 +1,15 @@
+{
+  "name": "@facepay/sdk",
+  "version": "0.1.0",
+  "description": "Typed fetch-based client for the FacePay API",
+  "type": "module",
+  "license": "UNLICENSED",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
+  "files": ["dist", "src"],
+  "sideEffects": false,
+  "scripts": { "build": "tsc -p tsconfig.build.json", "prepublishOnly": "npm run build" },
+  "devDependencies": { "typescript": "^5.7.2" },
+  "publishConfig": { "access": "public" }
+}
