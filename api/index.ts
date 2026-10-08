@@ -1,11 +1,8 @@
-import { handle } from 'hono/vercel';
+import { handle } from '@hono/node-server/vercel';
 import { createApp } from '../src/api/app';
 
 export const config = { runtime: 'nodejs' };
 
 const app = createApp();
-const handler = handle(app);
-
-export const GET = handler;
-export const POST = handler;
-export const OPTIONS = handler;
+// Standalone Vercel Node functions receive IncomingMessage/ServerResponse.
+export default handle(app);
