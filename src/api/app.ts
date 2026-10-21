@@ -5,6 +5,7 @@ import { HTTPException } from 'hono/http-exception';
 import { getContext, type AppContext } from '../context.js';
 import { DomainError } from '../domain/rbac.js';
 import { verifyToken } from '../auth.js';
+import { verifyDeveloperKey } from '../developer-auth.js';
 import type { Env } from './http.js';
 import { authRoutes } from './routes/auth.js';
 import { moneyRoutes } from './routes/money.js';
@@ -52,7 +53,16 @@ export function createApp(ctx?: AppContext | (() => Promise<AppContext>)) {
     if (PUBLIC_PATHS.has(c.req.path)) return next();
     const h = c.req.header('Authorization');
     if (!h?.startsWith('Bearer ')) throw new DomainError(401, 'unauthenticated', 'Missing bearer token');
-    c.set('principal', await verifyToken(h.slice(7)));
+    const token = h.slice(7);
+    if (token.startsWith('fp_sandbox_')) {
+      const developer = await verifyDeveloperKey(token, c.get('app'));
+      if (c.req.path === '/v1/verification-sessions') {
+        const body = await c.req.raw.clone().json().catch(() => ({})) as { subjectId?: string; modality?: string };
+        if (body.subjectId !== developer.customerId || body.modality !== 'pin') throw new DomainError(403, 'sandbox_subject_required', 'Developer keys can verify only their own synthetic test customer using simulated PIN verification');
+      }
+      c.set('principal', developer.principal);
+      c.header('X-FacePay-Environment', 'sandbox');
+    } else c.set('principal', await verifyToken(token));
     return next();
   });
 

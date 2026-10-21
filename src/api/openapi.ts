@@ -5,7 +5,7 @@ type Op = { m: 'get' | 'post'; path: string; summary: string; perm?: string; bod
 const ref = (n: string) => ({ $ref: `#/components/schemas/${n}` });
 const obj = (properties: Record<string, unknown>, required: string[] = []) => ({ type: 'object', properties, required });
 const str = { type: 'string' };
-const int = { type: 'integer', description: 'Minor units (ZAR cents)' };
+const int = { type: 'integer', description: 'Minor units (ZAR cents)', example: 12500 };
 
 export const OPERATIONS: Op[] = [
   { m: 'post', path: '/v1/auth/login', summary: 'Log in and receive a signed JWT', body: 'LoginRequest', res: 'LoginResponse', public: true },
@@ -61,7 +61,7 @@ const schemas: Record<string, unknown> = {
     provider: str, balanceSource: { type: 'string', enum: ['provider'] }, availableBalanceMinor: int, currency: str,
     methods: { type: 'array', items: obj({ id: str, type: str, maskedDisplay: str, state: str }) }, recent: { type: 'array', items: ref('Transaction') },
   }),
-  CreatePaymentIntent: obj({ merchantId: str, amountMinor: int, currency: { type: 'string', example: 'ZAR' }, expiresAt: { type: 'string', format: 'date-time' }, channel: str }, ['merchantId', 'amountMinor', 'currency']),
+  CreatePaymentIntent: obj({ merchantId: { type: 'string', example: 'tenant_abc' }, amountMinor: { ...int, minimum: 1 }, currency: { type: 'string', minLength: 3, maxLength: 3, example: 'ZAR' }, expiresAt: { type: 'string', format: 'date-time' }, channel: { type: 'string', enum: ['face', 'nfc', 'qr', 'card', 'palm', 'fingerprint'] } }, ['merchantId', 'amountMinor', 'currency']),
   ConfirmPaymentIntent: obj({ verificationSessionId: str }),
   PaymentIntent: obj({
     id: str, merchantId: str, amountMinor: int, currency: str,
@@ -89,24 +89,25 @@ export function buildOpenApi() {
     if (o.idem) params.push({ name: 'Idempotency-Key', in: 'header', required: o.idem === 'required', schema: str });
     (paths[o.path] ??= {})[o.m] = {
       summary: o.summary,
+      operationId: o.m + '_' + o.path.replace(/\W+/g, '_').replace(/^_|_$/g, ''),
+      tags: [o.path.split('/')[2]],
       ...(o.perm ? { description: `Requires permission \`${o.perm}\`.` } : {}),
       security: o.public ? [] : [{ bearerAuth: [] }],
       parameters: params,
       ...(o.body ? { requestBody: { required: true, content: { 'application/json': { schema: ref(o.body) } } } } : {}),
       responses: {
-        [o.m === 'post' && o.res !== 'LoginResponse' ? '200/201' : '200']: { description: 'OK', content: { 'application/json': { schema: ref(o.res ?? 'Generic') } } },
+        [o.path.endsWith('/biometric-media') ? '403' : o.m === 'post' && ['/v1/payment-intents', '/v1/verification-sessions', '/v1/refunds', '/v1/devices/enrol', '/v1/webhooks/subscriptions', '/v1/leads'].includes(o.path) ? '201' : '200']: { description: o.path.endsWith('/biometric-media') ? 'Raw biometric access is always denied' : 'Success', content: { 'application/json': { schema: ref(o.res ?? 'Generic') } } },
+        ...Object.fromEntries(['400','401','402','403','404','409','422','429','500','503'].filter(code => !(code === '403' && o.path.endsWith('/biometric-media'))).map(code => [code, { description: ({ '400':'Malformed request', '401':'Authentication required or expired', '402':'Active paid developer subscription required', '403':'Insufficient permission', '404':'Resource not found', '409':'Conflict or idempotency mismatch', '422':'Validation failed', '429':'Rate limited', '500':'Server error', '503':'Required service temporarily unavailable' } as Record<string,string>)[code], content: { 'application/json': { schema: ref('Error') } } }])),
         default: { description: 'Error {error:{code,message}}', content: { 'application/json': { schema: ref('Error') } } },
       },
     };
   }
-  // OpenAPI response keys must be single codes
-  for (const p of Object.values(paths)) for (const op of Object.values<any>(p)) if (op.responses['200/201']) { op.responses['201'] = op.responses['200/201']; delete op.responses['200/201']; }
   return {
     openapi: '3.1.0',
     info: { title: 'FacePay Core API', version: '0.1.0', description: 'FACE YOUR MONEY. Amounts are integers in minor units (ZAR cents). Balances are provider-sourced. A payment is never captured until the provider confirms.' },
-    servers: [{ url: 'https://api.facepay.com' }, { url: 'http://localhost:8787' }],
+    servers: [{ url: '/', description: 'Current FacePay sandbox deployment' }, { url: 'http://localhost:8787', description: 'Local development' }],
     paths,
-    components: { securitySchemes: { bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' } }, schemas },
+    components: { securitySchemes: { bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT or fp_sandbox_ API key', description: 'Use a sandbox demo JWT or a paid developer API key. Developer keys are merchant-scoped and limited to 60 requests/minute.' } }, schemas },
     'x-permissions': PERMISSIONS,
   };
 }

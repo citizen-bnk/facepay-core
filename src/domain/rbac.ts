@@ -187,7 +187,7 @@ export function canReadRawBiometrics(_p: Principal): boolean {
 }
 
 export class DomainError extends Error {
-  constructor(public status: 400 | 401 | 429 | 403 | 404 | 409 | 422 | 502 | 503, public code: string, message: string) {
+  constructor(public status: 400 | 401 | 402 | 429 | 403 | 404 | 409 | 422 | 502 | 503, public code: string, message: string) {
     super(message);
   }
 }
