@@ -1,6 +1,6 @@
 import { PERMISSIONS } from '../domain/rbac.js';
 
-type Op = { m: 'get' | 'post'; path: string; summary: string; perm?: string; body?: string; res?: string; idem?: 'required' | 'optional'; public?: boolean; query?: string[] };
+type Op = { m: 'get' | 'post' | 'delete'; path: string; summary: string; perm?: string; body?: string; res?: string; idem?: 'required' | 'optional'; public?: boolean; query?: string[] };
 
 const ref = (n: string) => ({ $ref: `#/components/schemas/${n}` });
 const obj = (properties: Record<string, unknown>, required: string[] = []) => ({ type: 'object', properties, required });
@@ -8,6 +8,16 @@ const str = { type: 'string' };
 const int = { type: 'integer', description: 'Minor units (ZAR cents)', example: 12500 };
 
 export const OPERATIONS: Op[] = [
+  {"m":"post","path":"/mobile/otp/start","summary":"Request WhatsApp OTP; SMS only after confirmed error 63024","public":true,"body":"MobileOtpStart","res":"MobileOtpChallenge"},
+  {"m":"get","path":"/mobile/otp/status/{id}","summary":"Check delivery and apply strict provider-confirmed SMS fallback","public":true,"res":"Generic"},
+  {"m":"post","path":"/mobile/otp/verify","summary":"Verify a code and create an isolated mobile session","public":true,"body":"MobileOtpVerify","res":"Generic"},
+  {"m":"delete","path":"/mobile/session","summary":"Revoke this mobile session","res":"Generic"},
+  {"m":"delete","path":"/mobile/account","summary":"Permanently delete the signed-in mobile account and residence data","res":"Generic"},
+  {"m":"post","path":"/mobile/residence","summary":"Consent and enroll in a 15-day residence check","body":"ResidenceEnroll","res":"Generic"},
+  {"m":"get","path":"/mobile/residence","summary":"Read your own residence progress","res":"Generic"},
+  {"m":"post","path":"/mobile/residence/sample","summary":"Submit a fresh daily location in your home window","body":"ResidencePoint","res":"Generic"},
+  {"m":"get","path":"/mobile/residence/report","summary":"Get a signed residence evidence report after 15 days","res":"Generic"},
+  {"m":"delete","path":"/mobile/residence","summary":"Revoke consent and delete evidence","res":"Generic"},
   { m: 'post', path: '/v1/auth/login', summary: 'Log in and receive a signed JWT', body: 'LoginRequest', res: 'LoginResponse', public: true },
   { m: 'get', path: '/v1/me', summary: 'Current user and scopes', res: 'Me' },
   { m: 'get', path: '/v1/wallet', summary: 'Provider-sourced wallet', perm: 'wallet:read', res: 'Wallet' },
@@ -45,6 +55,11 @@ export const OPERATIONS: Op[] = [
 ];
 
 const schemas: Record<string, unknown> = {
+  MobileOtpStart: {"type":"object","properties":{"phone":{"type":"string","pattern":"^\\+[1-9]\\d{7,14}$","example":"+27821234567"}},"required":["phone"]},
+  MobileOtpVerify: {"type":"object","properties":{"challengeId":{"type":"string","format":"uuid"},"code":{"type":"string","pattern":"^[0-9]{4,10}$"}},"required":["challengeId","code"]},
+  MobileOtpChallenge: {"type":"object","properties":{"challengeId":{"type":"string","format":"uuid"},"channel":{"type":"string","enum":["whatsapp","sms"]},"expiresIn":{"type":"integer"}},"required":["challengeId","channel","expiresIn"]},
+  ResidencePoint: {"type":"object","properties":{"latitude":{"type":"number","minimum":-90,"maximum":90},"longitude":{"type":"number","minimum":-180,"maximum":180},"accuracy":{"type":"number","minimum":0,"description":"Metres; no more than 50 to qualify"},"timestamp":{"type":"number","description":"Fresh device timestamp in milliseconds"},"mocked":{"type":"boolean"}},"required":["latitude","longitude","accuracy","timestamp"]},
+  ResidenceEnroll: {"type":"object","properties":{"address":{"type":"string","minLength":12,"maxLength":500},"home":{"type":"object","properties":{"latitude":{"type":"number","minimum":-90,"maximum":90},"longitude":{"type":"number","minimum":-180,"maximum":180}},"required":["latitude","longitude"]},"timezone":{"type":"string","example":"Africa/Johannesburg"},"homeHour":{"type":"integer","minimum":0,"maximum":23},"consent":{"const":true},"consentVersion":{"const":"residence-v1-2026-10"}},"required":["address","home","timezone","homeHour","consent","consentVersion"]},
   Error: obj({ error: obj({ code: str, message: str }, ['code', 'message']) }, ['error']),
   Generic: { type: 'object', additionalProperties: true },
   LoginRequest: obj({ email: { type: 'string', format: 'email' }, password: str }, ['email', 'password']),
@@ -92,11 +107,11 @@ export function buildOpenApi() {
       operationId: o.m + '_' + o.path.replace(/\W+/g, '_').replace(/^_|_$/g, ''),
       tags: [o.path.split('/')[2]],
       ...(o.perm ? { description: `Requires permission \`${o.perm}\`.` } : {}),
-      security: o.public ? [] : [{ bearerAuth: [] }],
+      security: o.public ? [] : o.path.startsWith('/mobile/') ? [{ mobileAuth: [] }] : [{ bearerAuth: [] }],
       parameters: params,
       ...(o.body ? { requestBody: { required: true, content: { 'application/json': { schema: ref(o.body) } } } } : {}),
       responses: {
-        [o.path.endsWith('/biometric-media') ? '403' : o.m === 'post' && ['/v1/payment-intents', '/v1/verification-sessions', '/v1/refunds', '/v1/devices/enrol', '/v1/webhooks/subscriptions', '/v1/leads'].includes(o.path) ? '201' : '200']: { description: o.path.endsWith('/biometric-media') ? 'Raw biometric access is always denied' : 'Success', content: { 'application/json': { schema: ref(o.res ?? 'Generic') } } },
+        [o.path.endsWith('/biometric-media') ? '403' : o.m === 'post' && ['/v1/payment-intents', '/v1/verification-sessions', '/v1/refunds', '/v1/devices/enrol', '/v1/webhooks/subscriptions', '/v1/leads','/mobile/otp/start','/mobile/residence'].includes(o.path) ? '201' : '200']: { description: o.path.endsWith('/biometric-media') ? 'Raw biometric access is always denied' : 'Success', content: { 'application/json': { schema: ref(o.res ?? 'Generic') } } },
         ...Object.fromEntries(['400','401','402','403','404','409','422','429','500','503'].filter(code => !(code === '403' && o.path.endsWith('/biometric-media'))).map(code => [code, { description: ({ '400':'Malformed request', '401':'Authentication required or expired', '402':'Active paid developer subscription required', '403':'Insufficient permission', '404':'Resource not found', '409':'Conflict or idempotency mismatch', '422':'Validation failed', '429':'Rate limited', '500':'Server error', '503':'Required service temporarily unavailable' } as Record<string,string>)[code], content: { 'application/json': { schema: ref('Error') } } }])),
         default: { description: 'Error {error:{code,message}}', content: { 'application/json': { schema: ref('Error') } } },
       },
@@ -107,7 +122,7 @@ export function buildOpenApi() {
     info: { title: 'FacePay Core API', version: '0.1.0', description: 'FACE YOUR MONEY. Amounts are integers in minor units (ZAR cents). Balances are provider-sourced. A payment is never captured until the provider confirms.' },
     servers: [{ url: '/', description: 'Current FacePay sandbox deployment' }, { url: 'http://localhost:8787', description: 'Local development' }],
     paths,
-    components: { securitySchemes: { bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT or fp_sandbox_ API key', description: 'Use a sandbox demo JWT or a paid developer API key. Developer keys are merchant-scoped and limited to 60 requests/minute.' } }, schemas },
+    components: { securitySchemes: { mobileAuth: {type:'http',scheme:'bearer',bearerFormat:'Mobile session JWT',description:'Session from /mobile/otp/verify. Financial JWTs and developer keys are not accepted.'}, bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT or fp_sandbox_ API key', description: 'Use a sandbox demo JWT or a paid developer API key. Developer keys are merchant-scoped and limited to 60 requests/minute.' } }, schemas },
     'x-permissions': PERMISSIONS,
   };
 }

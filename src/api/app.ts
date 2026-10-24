@@ -1,3 +1,5 @@
+import { mobileRoutes } from '../mobile/routes.js';
+import { VerifyDeliveryError } from '../mobile/twilio.js';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { secureHeaders } from 'hono/secure-headers';
@@ -41,7 +43,7 @@ export function createApp(ctx?: AppContext | (() => Promise<AppContext>)) {
     cors({
       origin: (origin) => (origin && originAllowed(origin) ? origin : null),
       allowHeaders: ['Authorization', 'Content-Type', 'Idempotency-Key'],
-      allowMethods: ['GET', 'POST', 'OPTIONS'],
+      allowMethods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
       exposeHeaders: ['Idempotent-Replayed'],
       maxAge: 600,
     }),
@@ -66,6 +68,7 @@ export function createApp(ctx?: AppContext | (() => Promise<AppContext>)) {
     return next();
   });
 
+  app.route('/', mobileRoutes);
   app.route('/', publicRoutes);
   app.route('/', authRoutes);
   app.route('/', moneyRoutes);
@@ -77,6 +80,7 @@ export function createApp(ctx?: AppContext | (() => Promise<AppContext>)) {
 
   app.notFound((c) => c.json({ error: { code: 'not_found', message: 'Route not found' } }, 404));
   app.onError((err, c) => {
+    if (err instanceof VerifyDeliveryError) return c.json({error:{code:'verification_unavailable',message:'Verification could not be completed. Check your code or request a new one.'}}, 503);
     if (err instanceof DomainError) return c.json({ error: { code: err.code, message: err.message } }, err.status);
     if (err instanceof HTTPException) return c.json({ error: { code: 'http_error', message: err.message } }, err.status);
     console.error('unhandled', err instanceof Error ? err.message : err);

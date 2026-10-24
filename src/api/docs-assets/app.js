@@ -116,7 +116,7 @@
   }
   function requestPath() { return $('request-path').value + ($('query').value.trim() ? '?' + $('query').value.trim().replace(/^\?/, '') : ''); }
   function allowedOperation(method, path) {
-    if (typeof path !== 'string' || path.length > 1800 || !path.startsWith('/v1/') || /[\\#\r\n]/.test(path)) throw new Error('Use an API-relative /v1/ path.');
+    if (typeof path !== 'string' || path.length > 1800 || (!path.startsWith('/v1/') && !path.startsWith('/mobile/')) || /[\\#\r\n]/.test(path)) throw new Error('Use a documented API-relative /v1/ or /mobile/ path.');
     const url = new URL(path, location.origin);
     if (url.origin !== location.origin || url.pathname !== path.split('?')[0]) throw new Error('Cross-origin and normalized paths are not allowed.');
     const op = operations.find(o => o.method === method && new RegExp('^' + o.path.split('/').map(segment => segment === '{id}' ? '[^/]+' : segment.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('/') + '$').test(url.pathname));
@@ -125,7 +125,7 @@
   }
   async function apiRequest(method, path, body, idempotencyKey, fromLab = false) {
     const op = allowedOperation(method, path);
-    if (fromLab && op.path === '/v1/auth/login') throw new Error('Connect an identity in the authentication panel. Tokens are not exposed to code.');
+    if (fromLab && (op.path === '/v1/auth/login' || op.path.startsWith('/mobile/otp/'))) throw new Error('Connect an identity in the authentication panel. Tokens are not exposed to code.');
     if (op.security?.length && !token) throw new Error('Connect a demo account or paste a valid bearer token first.');
     if (body !== undefined && JSON.stringify(body).length > 20000) throw new Error('Request body is limited to 20 KB in this console.');
     const headers = { Accept: 'application/json' };

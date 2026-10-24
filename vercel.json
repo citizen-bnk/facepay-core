@@ -6,5 +6,16 @@
       "includeFiles": "{drizzle/**,src/api/docs-assets/**}"
     }
   },
-  "rewrites": [{ "source": "/(.*)", "destination": "/api" }]
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/api"
+    }
+  ],
+  "crons": [
+    {
+      "path": "/mobile/retention",
+      "schedule": "0 2 * * *"
+    }
+  ]
 }
